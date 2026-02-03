@@ -1,0 +1,19 @@
+pipeline{
+	agent any
+
+	stages{
+		stage('Print message')
+		{ 
+		steps{
+			sh echo "hello world"
+		     }
+		}
+		
+		stage('Print Hostname'){
+		steps{
+			sh "hostname"
+		     }
+		}
+
+	}
+}
