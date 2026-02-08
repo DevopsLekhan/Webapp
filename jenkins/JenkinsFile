@@ -1,19 +1,63 @@
 pipeline{
-	agent any
+    agents any
 
-	stages{
-		stage('Print message')
-		{ 
-		steps{
-			sh echo "hello world"
-		     }
-		}
-		
-		stage('Print Hostname'){
-		steps{
-			sh "hostname"
-		     }
-		}
+    tools{
+        jdk 'java-17'
+        maven 'maven'
+    }
 
-	}
+    stages{
+        stage('Git Checkout'){
+            steps{
+                git branch: 'master', url:'https://github.com/DevopsLekhan/Webapp.git'
+            
+            }
+        }
+
+        stage('Code compile'){
+            steps{
+                sh 'mvn compile'
+            }
+        } 
+
+        stage('Code Package'){
+            steps{
+                sh 'mvn clean install'
+            }
+        }  
+
+        stage('Build and tag'){
+            steps{
+                sh 'docker build -t lekhanhn1/project2 .'
+            }
+        }
+
+        stage('Containeristion'){
+            steps{
+                sh '''
+                docker run -it -d --name c6 -p 9012:8080 lekhanhn1/project2
+                '''
+            }
+        }
+        stage('Login to Docker hub'){
+            steps{
+                script{
+                    withCredentials([usernameColonPassword(credentialsId: 'docker-hub-credentials', variable: 'DOCKER_USERNAME'), usernameColonPassword(credentialsId: 'docker-hub-credentials', variable: 'DOCKER_PASSWORD')]) 
+    // some block
+                }
+
+            }
+        }
+        
+        
+        stage('Pushing image to repository'){
+            steps{
+                sh 'docker push lekhanhn1/project2'
+            }
+        }
+
+
+    }
+
+
 }
